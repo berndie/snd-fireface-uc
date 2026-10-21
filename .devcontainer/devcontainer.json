@@ -1,0 +1,28 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  "mounts": [
+    "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume",
+    // USB passthrough (bind mount so re-plugged devices show up without a rebuild)
+    "source=/dev/bus/usb,target=/dev/bus/usb,type=bind",
+    // ALSA devices, to test the driver once it is loaded on the host
+    "source=/dev/snd,target=/dev/snd,type=bind",
+    // Host kernel headers (read-only) for compiling the module
+    "source=/lib/modules,target=/lib/modules,type=bind,readonly",
+    "source=/usr/src,target=/usr/src,type=bind,readonly"
+  ],
+  "runArgs": [
+    // KVM, to test the kernel module in a QEMU VM instead of on the host kernel
+    "--device=/dev/kvm",
+    "--device-cgroup-rule=c 189:* rmw",
+    "--device-cgroup-rule=c 116:* rmw"
+  ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude && sudo apt-get update && sudo apt-get install -y --no-install-recommends libportaudio2 libgl1 libegl1 libxkbcommon0 libfontconfig1 libdbus-1-3 libglib2.0-0 xvfb imagemagick libgtk-3-0t64 libsecret-1-0 libepoxy0 libgles2 libusb-1.0-0 libusb-1.0-0-dev alsa-utils kmod usbutils unzip && curl -LsSf https://astral.sh/uv/install.sh | sh",
+}

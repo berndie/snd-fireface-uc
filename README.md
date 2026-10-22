@@ -1,6 +1,26 @@
 # snd-fireface-uc — Linux ALSA driver for the RME Fireface UC
 
-A kernel driver for the RME Fireface UC, in **PC mode** (USB ID `0424:3fc5`,
+
+> [!CAUTION]
+> This driver was vibe-coded with the help of Claude Code. ![AI](images/ai40.png) 
+> Some spotchecks were done manually, but use at your own risk.
+
+## TLDR
+
+Installing the driver on a DKMS-enabled machine (tested on Ubuntu 22.04):
+
+```sh
+cd driver
+make
+cd ..
+sudo cp -r driver /usr/src/snd-fireface-uc-0.1
+sudo dkms install snd-fireface-uc/0.1
+```
+
+
+## What?
+
+A vibe-coded kernel driver for the RME Fireface UC, in **PC mode** (USB ID `0424:3fc5`,
 shown by `lsusb` as "Fireface UC Win") and **Mac mode** (`2a39:3fc6`,
 "Fireface UC Mac"). The driver detects which mode the unit is in. It
 provides a normal ALSA sound card, so ALSA applications, PulseAudio/PipeWire,
@@ -123,6 +143,14 @@ sd.default.samplerate = 48000
 rec = sd.playrec(signal, channels=2, dtype="float32")
 ```
 
+To play a WAV file on chosen outputs (numbered from 1; a mono file goes to
+every listed output):
+
+```sh
+tools/play_wav.py song.wav 1 2          # stereo file on AN 1/2
+tools/play_wav.py -g -6 tone.wav 3 4 5  # mono file on AN 3-5, 6 dB down
+```
+
 ## Underrun recovery
 
 If the USB stream to the unit stalls for about 5 ms or more (system load, a busy
@@ -184,7 +212,8 @@ again inside a container, and `tools/vm.sh restart` is needed.
   the driver tests: `test_alsa.py` (loopback, all rates and formats),
   `stress.sh` (lifecycle, controls, unplug), `latency.py`, `click_lag.py`
   (loopback lag stability), `diag_duplex.py` and
-  `diag_aplay.sh` (dropout timelines), `vm.sh` (the test VM)
+  `diag_aplay.sh` (dropout timelines), `vm.sh` (the test VM), and
+  `play_wav.py` (play a WAV file on chosen outputs)
 
 ## Known issues and not done yet
 
